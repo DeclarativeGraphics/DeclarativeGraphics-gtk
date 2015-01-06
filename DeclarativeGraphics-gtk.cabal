@@ -17,7 +17,8 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Graphics.Declarative.Gtk.Window,
-                       Graphics.Declarative.Gtk.KeyboardInput
+                       Graphics.Declarative.Gtk.KeyboardInput,
+                       Graphics.Declarative.Gtk.Debug
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8, DeclarativeGraphics,
