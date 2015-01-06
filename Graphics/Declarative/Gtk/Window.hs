@@ -19,6 +19,7 @@ import Graphics.Declarative.Gtk.KeyboardInput
 
 
 data GtkEvent = Expose
+              | Tick
               | KeyPress Key
               | KeyRelease Key
               | MouseMove (Double, Double)
@@ -62,6 +63,8 @@ runCairoProgram state step = gtkWindowCanvas $ \canvas -> do
 
       gtkProcessEvent :: E.EventM i (Maybe GtkEvent) -> E.EventM i Bool
       gtkProcessEvent handler = handler >>= maybeProcessEvent >> E.eventSent
+
+  G.timeoutAdd (processEvent Tick >> return True) 20 --ms
 
   canvas `G.widgetAddEvents` [G.PointerMotionMask]
 
