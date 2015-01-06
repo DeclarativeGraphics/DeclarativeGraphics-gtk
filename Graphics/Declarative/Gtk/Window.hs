@@ -28,12 +28,21 @@ data GtkEvent = Expose
 type Renderer = Double -> Double -> Cairo.Render ()
 
 
-showFormWindow :: (Double,Double) -> Form -> IO ()
+showFormWindow :: (Double, Double) -> Form -> IO ()
 showFormWindow origin = showCairoWindow . formRenderer origin
 
 showCairoWindow :: Renderer -> IO ()
 showCairoWindow renderer = runCairoProgram () step
   where step _event state = return (state, renderer)
+
+runFormProgram :: (Double, Double)
+               -> state
+               -> (GtkEvent -> state -> IO (state, Form))
+               -> IO ()
+runFormProgram origin state step
+  = runCairoProgram state $ \ event state -> do
+      (newState, newForm) <- step event state
+      return (newState, formRenderer origin newForm)
 
 runCairoProgram :: state
                 -> (GtkEvent -> state -> IO (state, Renderer))
