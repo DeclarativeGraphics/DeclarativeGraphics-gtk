@@ -21,6 +21,7 @@ import Graphics.Declarative.Gtk.KeyboardInput
 data GtkEvent = Expose
               | KeyPress Key
               | KeyRelease Key
+              | MouseMove (Double, Double)
               deriving (Show, Eq)
 
 
@@ -53,9 +54,12 @@ runCairoProgram state step = gtkWindowCanvas $ \canvas -> do
       gtkProcessEvent :: E.EventM i (Maybe GtkEvent) -> E.EventM i Bool
       gtkProcessEvent handler = handler >>= maybeProcessEvent >> E.eventSent
 
-  canvas `on` G.exposeEvent     $ gtkProcessEvent handleExpose
-  canvas `on` G.keyPressEvent   $ gtkProcessEvent handleKeyPress
-  canvas `on` G.keyReleaseEvent $ gtkProcessEvent handleKeyRelease
+  canvas `G.widgetAddEvents` [G.PointerMotionMask]
+
+  canvas `on` G.exposeEvent       $ gtkProcessEvent handleExpose
+  canvas `on` G.keyPressEvent     $ gtkProcessEvent handleKeyPress
+  canvas `on` G.keyReleaseEvent   $ gtkProcessEvent handleKeyRelease
+  canvas `on` G.motionNotifyEvent $ gtkProcessEvent handleMouseMove
 
 handleExpose :: E.EventM E.EExpose (Maybe GtkEvent)
 handleExpose = return (Just Expose)
@@ -71,6 +75,11 @@ handleKeyRelease = do
   key <- E.eventKeyVal
   return $ KeyRelease <$> keyboardInputFromGdk key
 
+
+handleMouseMove :: E.EventM E.EMotion (Maybe GtkEvent)
+handleMouseMove = do
+  pos <- E.eventCoordinates
+  return $ Just (MouseMove pos)
 
 
 -------------------- RENDERING ------------------------
