@@ -10,10 +10,13 @@ import Graphics.Declarative.Gtk.Window as Window
 import Data.Vec2 as Vec2
 
 -- HACK
-debugTangentProgram :: Form -> IO ()
-debugTangentProgram form
-  = runFormProgram (0, 0) (move (200, 200) form) $ \ event oldForm -> case event of
+debugTangentProgram :: DebuggedForm -> IO ()
+debugTangentProgram debugform
+  = runFormProgram (0, 0) (moveForm debugform) $ \ event oldForm -> case event of
       MouseMove (x,y) -> let direction = Vec2.normalize (x-200, y-200)
-                             newForm = move (200, 200) $ debugTangent direction form
-                         in return (newForm, newForm)
-      _               -> return (oldForm, oldForm)
+                             newForm = moveForm $ debugAll direction $ debugform
+                         in return (newForm, debuggedForm newForm)
+      _               -> return (oldForm, debuggedForm oldForm)
+  where
+    moveForm = onDebug (move (200, 200))
+    debugAll dir = debugTangent dir . debugTangentVector dir
