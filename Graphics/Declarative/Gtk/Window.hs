@@ -13,6 +13,7 @@ import Graphics.Rendering.Cairo (liftIO)
 
 import Graphics.Declarative.Bordered as Bordered
 import Graphics.Declarative.Cairo.Form as Form
+import Graphics.Declarative.Physical2D
 
 import Graphics.Declarative.Gtk.KeyboardInput
 

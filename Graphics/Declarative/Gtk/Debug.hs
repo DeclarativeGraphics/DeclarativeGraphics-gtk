@@ -1,5 +1,6 @@
 module Graphics.Declarative.Gtk.Debug where
 
+import Graphics.Declarative.Physical2D
 import Graphics.Declarative.Bordered as Bordered
 import Graphics.Declarative.Cairo.Form as Form
 import Graphics.Declarative.Cairo.Debug as Debug
