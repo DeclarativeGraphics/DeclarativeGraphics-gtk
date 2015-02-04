@@ -20,6 +20,7 @@ import Graphics.Declarative.Gtk.KeyboardInput
 
 
 data GtkEvent = Expose
+              | Resize (Int, Int)
               | Tick
               | KeyPress Key
               | KeyRelease Key
@@ -70,6 +71,7 @@ runCairoProgram state step = gtkWindowCanvas $ \canvas -> do
   canvas `G.widgetAddEvents` [G.PointerMotionMask]
 
   canvas `on` G.exposeEvent       $ gtkProcessEvent handleExpose
+  canvas `on` G.configureEvent    $ gtkProcessEvent handleConfigure
   canvas `on` G.keyPressEvent     $ gtkProcessEvent handleKeyPress
   canvas `on` G.keyReleaseEvent   $ gtkProcessEvent handleKeyRelease
   canvas `on` G.motionNotifyEvent $ gtkProcessEvent handleMouseMove
@@ -77,6 +79,10 @@ runCairoProgram state step = gtkWindowCanvas $ \canvas -> do
 handleExpose :: E.EventM E.EExpose (Maybe GtkEvent)
 handleExpose = return (Just Expose)
 
+handleConfigure :: E.EventM E.EConfigure (Maybe GtkEvent)
+handleConfigure = do
+  size <- E.eventSize
+  return $ Just $ Resize size
 
 handleKeyPress :: E.EventM E.EKey (Maybe GtkEvent)
 handleKeyPress = do
