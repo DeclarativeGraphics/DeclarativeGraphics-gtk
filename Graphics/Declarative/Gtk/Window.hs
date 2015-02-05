@@ -70,6 +70,10 @@ runCairoProgram state step = gtkWindowCanvas $ \canvas -> do
 
   canvas `G.widgetAddEvents` [G.PointerMotionMask]
 
+  size <- G.widgetGetSize canvas
+
+  processEvent $ Resize size
+
   canvas `on` G.exposeEvent       $ gtkProcessEvent handleExpose
   canvas `on` G.configureEvent    $ gtkProcessEvent handleConfigure
   canvas `on` G.keyPressEvent     $ gtkProcessEvent handleKeyPress
