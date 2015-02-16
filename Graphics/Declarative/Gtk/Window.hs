@@ -24,8 +24,18 @@ data GtkEvent = Expose
               | Tick
               | KeyPress Key
               | KeyRelease Key
+              | ButtonPress (Double, Double) MouseButton
+              | ButtonRelease (Double, Double) MouseButton
               | MouseMove (Double, Double)
               deriving (Show, Eq)
+
+data MouseButton = LeftButton | MiddleButton | RightButton | OtherButton Int deriving (Show, Eq)
+
+buttonFromGdk :: G.MouseButton -> MouseButton
+buttonFromGdk G.LeftButton = LeftButton
+buttonFromGdk G.MiddleButton = MiddleButton
+buttonFromGdk G.RightButton = RightButton
+buttonFromGdk (G.OtherButton n) = OtherButton n
 
 
 type Renderer = Double -> Double -> Cairo.Render ()
@@ -74,11 +84,13 @@ runCairoProgram state step = gtkWindowCanvas $ \canvas -> do
 
   processEvent $ Resize size
 
-  canvas `on` G.exposeEvent       $ gtkProcessEvent handleExpose
-  canvas `on` G.configureEvent    $ gtkProcessEvent handleConfigure
-  canvas `on` G.keyPressEvent     $ gtkProcessEvent handleKeyPress
-  canvas `on` G.keyReleaseEvent   $ gtkProcessEvent handleKeyRelease
-  canvas `on` G.motionNotifyEvent $ gtkProcessEvent handleMouseMove
+  canvas `on` G.exposeEvent        $ gtkProcessEvent handleExpose
+  canvas `on` G.configureEvent     $ gtkProcessEvent handleConfigure
+  canvas `on` G.keyPressEvent      $ gtkProcessEvent handleKeyPress
+  canvas `on` G.keyReleaseEvent    $ gtkProcessEvent handleKeyRelease
+  canvas `on` G.buttonPressEvent   $ gtkProcessEvent handleButtonPress
+  canvas `on` G.buttonReleaseEvent $ gtkProcessEvent handleButtonRelease
+  canvas `on` G.motionNotifyEvent  $ gtkProcessEvent handleMouseMove
 
 handleExpose :: E.EventM E.EExpose (Maybe GtkEvent)
 handleExpose = return (Just Expose)
@@ -87,6 +99,7 @@ handleConfigure :: E.EventM E.EConfigure (Maybe GtkEvent)
 handleConfigure = do
   size <- E.eventSize
   return $ Just $ Resize size
+
 
 handleKeyPress :: E.EventM E.EKey (Maybe GtkEvent)
 handleKeyPress = do
@@ -99,10 +112,23 @@ handleKeyRelease = do
   return $ KeyRelease <$> keyboardInputFromGdk key
 
 
+handleButtonPress :: E.EventM E.EButton (Maybe GtkEvent)
+handleButtonPress = do
+  pos <- E.eventCoordinates
+  button <- E.eventButton
+  return $ Just $ ButtonPress pos $ buttonFromGdk button
+
+handleButtonRelease :: E.EventM E.EButton (Maybe GtkEvent)
+handleButtonRelease = do
+  pos <- E.eventCoordinates
+  button <- E.eventButton
+  return $ Just $ ButtonRelease pos $ buttonFromGdk button
+
+
 handleMouseMove :: E.EventM E.EMotion (Maybe GtkEvent)
 handleMouseMove = do
   pos <- E.eventCoordinates
-  return $ Just (MouseMove pos)
+  return $ Just $ MouseMove pos
 
 
 -------------------- RENDERING ------------------------
